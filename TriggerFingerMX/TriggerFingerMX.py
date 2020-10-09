@@ -26,7 +26,7 @@ class TriggerFingerMX(ControlSurface):
 
     def __init__(self, *a, **k):
         super(TriggerFingerMX, self).__init__(*a, **k)
-        self.show_message("-----------------------= TriggerFingerMX v0.4 LOADING - maxcloutier13 says hi =----------------------------------------------------------")
+        self.show_message("-----------------------= TriggerFingerMX v0.5 LOADING - maxcloutier13 says hi =----------------------------------------------------------")
         self.log_message("-----------------------= TriggerFingerMX LOADING - maxcloutier13 says hi =----------------------------------------------------------")
         with self.component_guard():
             self._init_controls()
