@@ -19,8 +19,8 @@ from _Framework.MidiMap import MidiMap as MidiMapBase
 from _Framework.MidiMap import make_button, make_encoder, make_slider
 from _Framework.InputControlElement import MIDI_NOTE_TYPE, MIDI_CC_TYPE
 
-#Global playing flag. Bet it exists. Ah well. 
-_is_playing = 0
+play_flag = 0
+overdub_flag = 0
 
 class TriggerFingerMX(ControlSurface):
 
@@ -91,31 +91,41 @@ class TriggerFingerMX(ControlSurface):
     
     #Play/Pause        
     def _trig_pad1(self, value):                
-        if value > 0:
-            global _is_playing
-            if _is_playing == 0:                
-                #Not playing: unpause
-                _is_playing = 1
-                self.song().continue_playing()
+        if value > 0: 
+            global play_flag
+            if self.song().is_playing == 0:
+                #Song not playing
+                if play_flag == 0:
+                    #Song is paused: unpause
+                    self.song().continue_playing()
+                elif play_flag == 1:
+                    #Song is Stopped, play from selection start
+                    self.song().play_selection()
+                    play_flag = 0 
+                else:
+                    #Song is stopped and reset, play from start
+                    self.song().start_playing()
+                    play_flag = 0  
             else:
                 #Playing: pause
-                _is_playing = 0
                 self.song().stop_playing()
-            
+    #Stop        
     def _trig_pad2(self, value):        
         if value > 0:
-            global _is_playing
-            if _is_playing == 0:
-                #Not playing: return to start
+            global play_flag
+            if play_flag == 0:
+                #Not playing, reset playing position to start
                 self.song().stop_playing()
+                play_flag = 1
             else:
-                #Playing: Stop
+                #Playing, stops, but tells play button to start from position next time
                 self.song().stop_playing()
+                play_flag = 2
+                
     #Launch clip
     def _trig_pad3(self, value):        
         if value > 0:
             self._launch_clip(False)
-            self.show_message("TFMX Debug: Pad3 triggered")
 
     #2nd row
     def _trig_pad4(self, value):        
@@ -152,10 +162,10 @@ class TriggerFingerMX(ControlSurface):
         if value > 0:
             self._move_clipslot(1)
             self.show_message("TFMX Debug: Pad10 triggered")
-
+    #Overdub
     def _trig_pad11(self, value):        
         if value > 0:
-            self.show_message("TFMX Debug: Pad11 triggered")
+            self._overdub(False)
     
     #Top-row
     def _trig_pad12(self, value):        
@@ -217,8 +227,21 @@ class TriggerFingerMX(ControlSurface):
         #NOPE tracks.append(self.song().master_track)
         return tracks
         
-    def _launch_clip(self, value):        
-        #Trigger that motherfucker
-        self.log_message("------------------------------- Should fire the bitch")
-        currentSong = self.song().view.highlighted_clip_slot.set_fire_button_state(True)
-        
+    def _launch_clip(self, value):       
+        global overdub_flag
+        #self.log_message("--> Track launch! -----")
+        #self.song().view.highlighted_clip_slot.set_fire_button_state(True)
+        _current_slot = self.song().view.highlighted_clip_slot 
+        if _current_slot.is_playing == 0 and _current_slot.is_recording == 0:            
+            self.song().view.highlighted_clip_slot.set_fire_button_state(True)
+        elif _current_slot.is_playing == 1 and _current_slot.is_recording == 0:
+            self.song().overdub = 1
+            overdub_flag = 1
+        elif _current_slot.is_playing == 1 and _current_slot.is_recording == 1 and overdub_flag == 1:
+            self.song().overdub = 0
+            overdub_flag = 0
+        else:
+            self.song().view.highlighted_clip_slot.set_fire_button_state(True)
+    def _overdub(self, value):
+        self.log_message("--> Overdub toggle -----")
+        self.song().overdub = not self.song().overdub
