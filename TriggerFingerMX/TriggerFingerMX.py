@@ -87,7 +87,8 @@ class TriggerFingerMX(ControlSurface):
     def _trig_pad0(self, value):        
         if value > 0:
             #Prep new clip
-            self.show_message("TFMX Debug: Pad0 triggered")
+            self._record_new()
+            #self.show_message("TFMX Debug: Pad0 triggered")
     
     #Play/Pause        
     def _trig_pad1(self, value):                
@@ -125,12 +126,14 @@ class TriggerFingerMX(ControlSurface):
     #Launch clip
     def _trig_pad3(self, value):        
         if value > 0:
-            self._launch_clip(False)
+            self._launch_clip()
 
     #2nd row
+    #Set new
     def _trig_pad4(self, value):        
         if value > 0:
-            self.show_message("TFMX Debug: Pad4 triggered")
+            self._set_new()
+            #self.show_message("TFMX Debug: Pad4 triggered")
     #-- Move left
     def _trig_pad5(self, value):        
         if value > 0:
@@ -149,9 +152,11 @@ class TriggerFingerMX(ControlSurface):
             self.show_message("TFMX Debug: Pad7 triggered")
             
     #3rd-row
+    #Stop new
     def _trig_pad8(self, value):     
         if value > 0:
-            self.show_message("TFMX Debug: Pad8 triggered")
+            self._stop_new()
+            #self.show_message("TFMX Debug: Pad8 triggered")
             
     def _trig_pad9(self, value):        
         if value > 0:
@@ -162,11 +167,10 @@ class TriggerFingerMX(ControlSurface):
         if value > 0:
             self._move_clipslot(1)
             self.show_message("TFMX Debug: Pad10 triggered")
-    #Overdub
+
     def _trig_pad11(self, value):        
         if value > 0:
-            self._overdub(False)
-    
+            self.show_message("TFMX Debug: Pad11 triggered")
     #Top-row
     def _trig_pad12(self, value):        
         if value > 0:
@@ -227,7 +231,7 @@ class TriggerFingerMX(ControlSurface):
         #NOPE tracks.append(self.song().master_track)
         return tracks
         
-    def _launch_clip(self, value):       
+    def _launch_clip(self):       
         global overdub_flag
         #self.log_message("--> Track launch! -----")
         #self.song().view.highlighted_clip_slot.set_fire_button_state(True)
@@ -242,6 +246,35 @@ class TriggerFingerMX(ControlSurface):
             overdub_flag = 0
         else:
             self.song().view.highlighted_clip_slot.set_fire_button_state(True)
-    def _overdub(self, value):
-        self.log_message("--> Overdub toggle -----")
-        self.song().overdub = not self.song().overdub
+    
+    #Position on next valid clipslot    
+    def _set_new(self):
+        self.show_message("TFMX Debug: SetNew")
+        #Find the first empty available clipslot and set it as highlighed
+        self._find_empty_slot()
+    
+    #Stop clips then Position on next valid clipslot
+    def _stop_new(self):
+        self.show_message("TFMX Debug: StopNew")
+        self.song().view.selected_track.stop_all_clips()
+        #Position on first empty cell
+        self._find_empty_slot()
+        
+    #Stop clips, position on next valid clipslot and fire record   
+    def _record_new(self):
+        self.show_message("TFMX Debug: RecordNew")
+        self.song().view.selected_track.stop_all_clips()
+        #Position on first empty cell
+        self._find_empty_slot()
+        self.song().view.highlighted_clip_slot.set_fire_button_state(True)
+    
+    def _find_empty_slot(self):
+        #Find the first empty available clipslot and set it as highlighed
+        for clipslot in self.song().view.selected_track.clip_slots:
+            if clipslot.has_clip == 0:
+                self.song().view.highlighted_clip_slot = clipslot
+                return
+    
+    
+        
+    
