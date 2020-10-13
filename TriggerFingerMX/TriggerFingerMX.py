@@ -81,6 +81,21 @@ class TriggerFingerMX(ControlSurface):
                                                [self._Pad4, self._Pad5, self._Pad6, self._Pad7], 
                                                [self._Pad8, self._Pad9, self._Pad10, self._Pad11],
                                                [self._Pad12, self._Pad13, self._Pad14, self._Pad15]])
+        #Encoders to auto-map to devices -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        self._Encoder0 = EncoderElement(MIDI_CC_TYPE,12,22, Live.MidiMap.MapMode.absolute, name='Encoder0')
+        self._Encoder1 = EncoderElement(MIDI_CC_TYPE,12,23, Live.MidiMap.MapMode.absolute, name='Encoder1')
+        self._Encoder2 = EncoderElement(MIDI_CC_TYPE,12,24, Live.MidiMap.MapMode.absolute, name='Encoder2')
+        self._Encoder3 = EncoderElement(MIDI_CC_TYPE,12,25, Live.MidiMap.MapMode.absolute, name='Encoder3')
+        self._Encoder4 = EncoderElement(MIDI_CC_TYPE,12,26, Live.MidiMap.MapMode.absolute, name='Encoder4')
+        self._Encoder5 = EncoderElement(MIDI_CC_TYPE,12,27, Live.MidiMap.MapMode.absolute, name='Encoder5')
+        self._Encoder6 = EncoderElement(MIDI_CC_TYPE,12,28, Live.MidiMap.MapMode.absolute, name='Encoder6')
+        self._Encoder7 = EncoderElement(MIDI_CC_TYPE,12,29, Live.MidiMap.MapMode.absolute, name='Encoder7')
+        self._Encoders = ButtonMatrixElement(rows=[[self._Encoder0, self._Encoder1, self._Encoder2, self._Encoder3, self._Encoder4,  self._Encoder5, self._Encoder6, self._Encoder7]])
+        #Device -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        self.log_message("Device component set")
+        self._device = DeviceComponent(name='Device', is_enabled=False, layer=Layer(parameter_controls=self._Encoders), device_selection_follows_track_selection=True)
+        self._device.set_enabled(True)
+        self.set_device_component(self._device)
         self.show_message("TFMX Debug: initControls: Done")
         
     #Bottom-row
