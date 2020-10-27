@@ -98,80 +98,52 @@ class TriggerFingerMX(ControlSurface):
         self.set_device_component(self._device)
         self.show_message("TFMX Debug: initControls: Done")
         
-    #Bottom-row
+    #--- Bottom-row
+    #Record New
     def _trig_pad0(self, value):        
         if value > 0:
-            #Prep new clip
             self._record_new()
-            #self.show_message("TFMX Debug: Pad0 triggered")
-    
+                
     #Play/Pause        
     def _trig_pad1(self, value):                
         if value > 0: 
-            global play_flag
-            if self.song().is_playing == 0:
-                #Song not playing
-                if play_flag == 0:
-                    #Song is paused: unpause
-                    self.song().continue_playing()
-                elif play_flag == 1:
-                    #Song is Stopped, play from selection start
-                    self.song().play_selection()
-                    play_flag = 0 
-                else:
-                    #Song is stopped and reset, play from start
-                    self.song().start_playing()
-                    play_flag = 0  
-            else:
-                #Playing: pause
-                self.song().stop_playing()
+            self._play_pause()
     #Stop        
     def _trig_pad2(self, value):        
         if value > 0:
-            global play_flag
-            if play_flag == 0:
-                #Not playing, reset playing position to start
-                self.song().stop_playing()
-                play_flag = 1
-            else:
-                #Playing, stops, but tells play button to start from position next time
-                self.song().stop_playing()
-                play_flag = 2
+            self._stop_reset()
                 
     #Launch clip
     def _trig_pad3(self, value):        
         if value > 0:
             self._launch_clip()
 
-    #2nd row
+    #-- 2nd row
     #Set new
     def _trig_pad4(self, value):        
         if value > 0:
             self._set_new()
-            #self.show_message("TFMX Debug: Pad4 triggered")
+            
     #-- Move left
     def _trig_pad5(self, value):        
         if value > 0:
-            self._move_track(1)
-            self.show_message("TFMX Debug: Pad5 triggered")
+            self._move_track(1)            
             
     #-- Move down        
     def _trig_pad6(self, value):        
         if value > 0:
             self._move_clipslot(0)
-            self.show_message("TFMX Debug: Pad6 triggered")
+            
     #-- Move right
     def _trig_pad7(self, value):        
         if value > 0:
-            self._move_track(0)
-            self.show_message("TFMX Debug: Pad7 triggered")
+            self._move_track(0)           
             
-    #3rd-row
+    #-- 3rd-row
     #Stop new
     def _trig_pad8(self, value):     
         if value > 0:
-            self._stop_new()
-            #self.show_message("TFMX Debug: Pad8 triggered")
+            self._stop_new()            
             
     def _trig_pad9(self, value):        
         if value > 0:
@@ -180,13 +152,12 @@ class TriggerFingerMX(ControlSurface):
     #-- Move Up        
     def _trig_pad10(self, value):        
         if value > 0:
-            self._move_clipslot(1)
-            self.show_message("TFMX Debug: Pad10 triggered")
+            self._move_clipslot(1)           
 
     def _trig_pad11(self, value):        
         if value > 0:
             self.show_message("TFMX Debug: Pad11 triggered")
-    #Top-row
+    #-- Top-row
     def _trig_pad12(self, value):        
         if value > 0:
             self.show_message("TFMX Debug: Pad12 triggered")
@@ -203,6 +174,38 @@ class TriggerFingerMX(ControlSurface):
         if value > 0:
             self.show_message("TFMX Debug: Pad15 triggered")
             
+    def _stop_reset(self):
+        global play_flag
+        if play_flag == 0:
+            #Not playing, reset playing position to start
+            self.song().stop_playing()
+            play_flag = 1
+        else:
+            #Playing, stops, but tells play button to start from position next time
+            self.song().stop_playing()
+            play_flag = 2
+        return
+            
+    def _play_pause(self):
+        #Play/pause functionality
+        global play_flag
+        if self.song().is_playing == 0:
+            #Song not playing
+            if play_flag == 0:
+                #Song is paused: unpause
+                self.song().continue_playing()
+            elif play_flag == 1:
+                #Song is Stopped, play from selection start
+                self.song().play_selection()
+                play_flag = 0 
+            else:
+                #Song is stopped and reset, play from start
+                self.song().start_playing()
+                play_flag = 0  
+        else:
+            #Playing: pause
+            self.song().stop_playing()
+    
     def _move_clipslot(self, up):
         scene = self.song().view.selected_scene
         scenes = self.song().scenes
